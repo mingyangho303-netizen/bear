@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小熊推箱子｜摩擦力實驗室</title>
+<style>
+/* 草原樣板的斑點背景、膠囊導覽和雙欄卡片。 */
+:root{--ink:#3e2b1f;--brown:#8a4b19;--green:#377a4a;--line:#e8d5b8;--glass:#ffffffdc;--shadow:0 12px 28px #70411c20}
+*{box-sizing:border-box}
+input,select,textarea{max-width:100%}
+body{margin:0;color:var(--ink);font-family:"Microsoft JhengHei",system-ui,sans-serif;background:radial-gradient(circle at 24px 24px,#8a4b1913 0 5px,transparent 6px) 0 0/58px 58px,linear-gradient(135deg,#ffe79a,#fff9e7 50%,#e8f7dc);min-height:100vh}
+main{width:min(1140px,calc(100% - 28px));margin:auto;padding:22px 0 36px}
+header,.card{background:var(--glass);border:1px solid white;box-shadow:var(--shadow)}
+header{border-radius:999px;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 20px;margin-bottom:20px;font-weight:800}
+.tag{display:inline-block;background:#e3f4e7;color:#245633;border-radius:999px;padding:6px 11px;font-size:.85rem}
+.grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}
+.card{border-radius:28px;padding:22px;min-width:0}
+h1{font-size:clamp(1.8rem,4vw,2.8rem);margin:10px 0 4px;line-height:1.15;color:#713812}
+h2{font-size:1.2rem;margin:0 0 12px}
+p{margin:8px 0;line-height:1.6}
+.scene{width:100%;display:block;border-radius:20px;margin-top:15px;background:#e7f7fc}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.stat{border-radius:17px;background:#fff3d2;padding:10px 4px;text-align:center}
+.stat:nth-child(2){background:#e3f4e7}
+.stat:nth-child(3){background:#e7f7fc}
+.stat b{display:block;font-size:clamp(1rem,2.5vw,1.55rem);font-variant-numeric:tabular-nums}
+.stat span{font-size:.8rem}
+.controls{display:grid;gap:12px}
+label{display:flex;align-items:baseline;justify-content:space-between;font-weight:750;gap:6px}
+select,button{font:inherit;border-radius:15px;border:1px solid var(--line);padding:9px 12px}
+select,input{width:100%}
+input{accent-color:var(--brown);margin:7px 0 0}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+button{cursor:pointer;background:linear-gradient(135deg,#8a4b19,#5e2f0e);color:white;font-weight:bold;min-height:42px}
+button.secondary{background:white;color:#713812}
+button:disabled{opacity:.5;cursor:default}
+:focus-visible{outline:3px solid #5b70c8;outline-offset:3px}
+.readings{background:#fff9e7;border-radius:16px;padding:10px 13px;font-size:.9rem;line-height:1.7}
+.lesson{margin-top:18px}
+small{color:#6b5343}
+#status{min-height:1.6em;font-weight:750;color:#245633}
+.legend{display:flex;flex-wrap:wrap;gap:7px 16px;font-size:.85rem}
+.push{color:#185390}.friction{color:#9b392e}
+/* 窄螢幕依序顯示實驗、控制區和教學提示。 */
+@media(max-width:760px){.grid{grid-template-columns:1fr}.card{padding:16px}header{padding:10px 13px;font-size:.9rem}}
+</style>
+</head>
+<body>
+<main>
+<header><span>🐻 草原物理實驗室</span><span class="tag">力與運動</span></header>
+<div class="grid">
+<section class="card" aria-labelledby="title">
+<span class="tag">互動實驗 01</span>
+<h1 id="title">小熊推箱子</h1>
+<p>換個地板，再試一次。小熊得用多大的力，箱子才會動？</p>
+<!-- SVG 場景與受力箭頭共用同一個座標系，縮放時保留相對位置。 -->
+<svg class="scene" viewBox="0 0 600 240" role="img" aria-labelledby="sceneTitle">
+<title id="sceneTitle">小熊在水平地面向右推箱子</title>
+<defs>
+<marker id="blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#185390"/></marker>
+<marker id="red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#9b392e"/></marker>
+<pattern id="groundPattern" width="38" height="24" patternUnits="userSpaceOnUse"><path d="M4 14h13m8-8h7" stroke="#3e2b1f" opacity=".2" stroke-width="2" stroke-linecap="round"/></pattern>
+</defs>
+<rect width="600" height="240" fill="#e7f7fc"/>
+<circle cx="514" cy="52" r="26" fill="#ffd365"/>
+<path d="M0 164Q120 80 249 164T600 145V200H0Z" fill="#b8dfa0"/>
+<path d="M0 170Q145 122 291 169T600 158V200H0Z" fill="#80b879"/>
+<rect id="ground" y="191" width="600" height="49" fill="#d7a165"/>
+<rect id="groundLines" y="191" width="600" height="49" fill="url(#groundPattern)"/>
+<g id="actor" transform="translate(0 0)">
+<g id="bear">
+<ellipse cx="61" cy="187" rx="33" ry="6" fill="#382419" opacity=".2"/>
+<path d="M44 165l-9 20h21l8-16m9-4 7 20h18l-8-24" fill="#75411f" stroke="#75411f" stroke-width="7" stroke-linejoin="round"/>
+<ellipse cx="62" cy="151" rx="27" ry="28" fill="#985b31"/>
+<circle cx="49" cy="104" r="10" fill="#75411f"/><circle cx="80" cy="99" r="10" fill="#75411f"/>
+<ellipse cx="67" cy="120" rx="29" ry="23" fill="#a86c40"/>
+<ellipse cx="83" cy="128" rx="15" ry="10" fill="#e6b98c"/>
+<circle cx="76" cy="115" r="3" fill="#36221b"/><ellipse cx="95" cy="125" rx="5" ry="3" fill="#36221b"/>
+<path d="M67 146q18 8 39-3" stroke="#75411f" stroke-width="13" stroke-linecap="round" fill="none"/>
+</g>
+<rect x="108" y="129" width="74" height="62" rx="6" fill="#c18442" stroke="#75411f" stroke-width="3"/>
+<path d="M113 184l64-48m-66 13h68m-68 22h68" stroke="#935b31" stroke-width="4"/>
+<line id="pushArrow" x1="145" y1="87" x2="145" y2="87" stroke="#185390" stroke-width="5" marker-end="url(#blue)" visibility="hidden"/>
+<line id="frictionArrow" x1="145" y1="108" x2="145" y2="108" stroke="#9b392e" stroke-width="5" marker-end="url(#red)" visibility="hidden"/>
+</g>
+<text id="groundName" x="16" y="222" fill="#3e2b1f" font-size="17" font-weight="bold">木板</text>
+</svg>
+<p class="legend"><span class="push">→ 小熊推力</span><span class="friction">← 箱子所受摩擦力</span></p>
+<p id="status" role="status">準備開始</p>
+<div class="stats">
+<div class="stat"><span>速度</span><b id="speed">0.00</b><span>m/s</span></div>
+<div class="stat"><span>加速度</span><b id="accel">0.00</b><span>m/s²</span></div>
+<div class="stat"><span>位移</span><b id="distance">0.00</b><span>m</span></div>
+</div>
+</section>
+<section class="card controls" aria-labelledby="control-title">
+<h2 id="control-title">實驗控制台</h2>
+<div><label for="surface">接觸表面</label><select id="surface">
+<option value="ice">光滑冰面</option><option value="wood" selected>木板</option><option value="rubber">橡膠墊</option>
+</select><small>摩擦係數是教學示例，代表箱底與該表面的組合。</small></div>
+<div><label for="mass">箱子質量 <output id="massValue" for="mass"></output></label><input id="mass" type="range" min="2" max="20" value="10"></div>
+<div><label for="force">設定推力 <output id="forceValue" for="force"></output></label><input id="force" type="range" min="0" max="150" value="25"></div>
+<div class="actions"><button id="start" type="button">開始推</button><button id="release" type="button" class="secondary" disabled>放手</button><button id="reset" type="button" class="secondary">重設</button></div>
+<div class="readings">
+<div>靜摩擦係數 μₛ <b id="staticCoeff"></b> ／動摩擦係數 μₖ <b id="kineticCoeff"></b></div>
+<div>正向力 N <b id="normal"></b></div>
+<div>最大靜摩擦力 μₛN <b id="limit"></b></div>
+<div>實際推力 <b id="applied"></b> ／摩擦力大小 <b id="friction"></b></div>
+<div>水平合力 <b id="net"></b>（向右為正）</div>
+</div>
+</section>
+</div>
+<section class="card lesson">
+<h2>課堂挑戰</h2>
+<p>保留預設的 10 kg 和 25 N，先在木板上按「開始推」，再換成冰面。箱子靜止時，摩擦力會跟著推力變大，直到上限 μₛN。滑動後，摩擦力大小改為 μₖN。試著在箱子滑動時放手，觀察加速度為什麼變成負值。</p>
+<small>模型假設箱子在水平面上、推力水平，g = 9.8 m/s²。可在實驗途中即時改變質量、表面與設定推力。</small>
+</section>
+</main>
+<script>
+'use strict';
+const byId = id => document.getElementById(id);
+const surfaces = {
+  ice: { name:'光滑冰面', static:0.08, kinetic:0.04, color:'#a8dcf0' },
+  wood: { name:'木板', static:0.40, kinetic:0.25, color:'#d7a165' },
+  rubber: { name:'橡膠墊', static:0.75, kinetic:0.55, color:'#a29b91' }
+};
+const surface = byId('surface'), mass = byId('mass'), force = byId('force');
+const start = byId('start'), release = byId('release');
+const trackLength = 8;
+let position = 0, velocity = 0, pushing = false, started = false;
+let finished = false, frame = null, lastTime = null;
+
+// 靜止時靜摩擦力平衡推力，超過上限才以動摩擦力計算。
+function forces() {
+  const material = surfaces[surface.value];
+  const weight = Number(mass.value) * 9.8;
+  const push = pushing ? Number(force.value) : 0;
+  const threshold = material.static * weight;
+  const sliding = velocity > 0 || push > threshold + 1e-9;
+  const resistance = sliding ? material.kinetic * weight : push;
+  return { material, weight, push, threshold, sliding, resistance,
+    net: push - resistance, acceleration: (push - resistance) / Number(mass.value) };
+}
+
+function arrow(id, magnitude, direction) {
+  const line = byId(id);
+  line.setAttribute('visibility', magnitude > 0 ? 'visible' : 'hidden');
+  line.setAttribute('x2', 145 + direction * Math.min(102, 14 + magnitude * 0.75));
+}
+
+function render() {
+  const f = forces();
+  const values = {
+    massValue: mass.value + ' kg', forceValue: force.value + ' N',
+    staticCoeff: f.material.static.toFixed(2), kineticCoeff: f.material.kinetic.toFixed(2),
+    normal: f.weight.toFixed(1) + ' N', limit: f.threshold.toFixed(1) + ' N',
+    applied: f.push.toFixed(1) + ' N', friction: f.resistance.toFixed(1) + ' N',
+    net: f.net.toFixed(1) + ' N', speed: velocity.toFixed(2),
+    accel: finished ? '—' : f.acceleration.toFixed(2), distance: position.toFixed(2),
+    groundName: f.material.name
+  };
+  for (const [id, value] of Object.entries(values)) byId(id).textContent = value;
+  const label = finished ? '已到達 8 m 終點，按重設可重新實驗' :
+    !started ? '準備開始' : f.sliding ? (pushing ? '滑動中 · 動摩擦力' : '放手滑行 · 動摩擦力') :
+    f.push > 0 ? '箱子靜止 · 靜摩擦力平衡推力' : '箱子靜止';
+  if (byId('status').textContent !== label) byId('status').textContent = label;
+  byId('ground').setAttribute('fill', f.material.color);
+  byId('actor').setAttribute('transform', 'translate(' + (position / trackLength * 350) + ' 0)');
+  byId('bear').setAttribute('opacity', pushing ? '1' : '.68');
+  arrow('pushArrow', f.push, 1);
+  arrow('frictionArrow', f.resistance, -1);
+  start.disabled = pushing || finished;
+  release.disabled = !pushing || finished;
+}
+
+// 用動畫時間差積分，放手減速時在速度等於零的瞬間截斷。
+function tick(time) {
+  frame = null;
+  const dt = lastTime === null ? 0 : Math.min(0.05, (time - lastTime) / 1000);
+  lastTime = time;
+  const f = forces();
+  if (f.sliding) {
+    const step = f.acceleration < 0 ? Math.min(dt, velocity / -f.acceleration) : dt;
+    const next = position + velocity * step + 0.5 * f.acceleration * step * step;
+    if (next >= trackLength) {
+      velocity = Math.sqrt(Math.max(0, velocity ** 2 + 2 * f.acceleration * (trackLength - position)));
+      position = trackLength;
+      finished = true;
+    } else {
+      position = next;
+      velocity = Math.max(0, velocity + f.acceleration * step);
+    }
+  }
+  render();
+  if (!finished && forces().sliding) frame = requestAnimationFrame(tick);
+  else lastTime = null;
+}
+
+function refresh() {
+  render();
+  if (!finished && frame === null && forces().sliding) frame = requestAnimationFrame(tick);
+}
+
+start.addEventListener('click', () => { started = true; pushing = true; refresh(); });
+release.addEventListener('click', () => { pushing = false; refresh(); });
+for (const control of [mass, force, surface]) control.addEventListener('input', refresh);
+byId('reset').addEventListener('click', () => {
+  if (frame !== null) cancelAnimationFrame(frame);
+  frame = lastTime = null;
+  position = velocity = 0;
+  pushing = started = finished = false;
+  mass.value = 10;
+  force.value = 25;
+  surface.value = 'wood';
+  render();
+});
+render();
+</script>
+</body>
+</html>
